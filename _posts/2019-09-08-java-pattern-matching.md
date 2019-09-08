@@ -5,7 +5,8 @@ title: Sum Types and Pattern Matching in Java
 
 So you're a Java programmer and while hanging out with your hip dev friends you've
 heard of *sum types* (aka *union types* or *variants*). Now you're wondering if they make
-sense for you and how would you use them in Java. In this post I'll explain what they are, how they are useful, and how to use them in Java.
+sense for you and how would you use them in Java. In this post I'll explain
+the what and the how of sum types and their use in Java.
 
 ## Product and Sum Types
 
@@ -68,7 +69,7 @@ is, you can expect different data. `InternalNode` and `LeafNode` are also called
 variants* of the sum type `Node`.
 
 Many languages have sum types as first class citizens. However, in Java you
-can still achieve the same by using inheritance. So for our example:
+can still achieve the same by using inheritance. So, for our example:
 
 ```java
 interface Node<T> {
@@ -85,7 +86,7 @@ interface Node<T> {
 
 This representation has several advantages:
 
-* by just looking at the type you can see what data is to be expected in each variant
+* by just looking at the type you can see what data is expected in each variant
 * you are forced to narrow down the type `Node` to one of its variants,
   `InternalNode` or `LeafNode`, before accessing the data. Otherwise, the
   compiler will bark.
@@ -134,7 +135,7 @@ needed anymore.
 ## Hiding the instanceof
 
 All those `instanceof`s and casts are pretty ugly and poluting. Can we abstract them
-away somehow. Sure thing! We could make a method to which we provide:
+away somehow? Sure thing! We could make a method to which we provide:
 
 * an object of the sum type to match
 * a lambda for each variant of the sum type. It will be called if the object matches that

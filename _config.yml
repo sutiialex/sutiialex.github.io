@@ -8,11 +8,11 @@ permalink:        pretty
 # Setup
 title:            Alex Sutii
 tagline:          'A Jekyll theme'
-description:      'A brazen two-column <a href="http://jekyllrb.com" target="_blank">Jekyll</a> theme that pairs a prominent sidebar with uncomplicated content. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.'
+description:      '<a href="https://github.com/sutiialex">Programmer</a>, <a href="https://www.facebook.com/ChiliConComedy/">Improv player</a>'
 
 author:
-  name:           'Mark Otto'
-  url:            https://twitter.com/mdo
+  name:           'Alexandru Sutii'
+  url:            https://www.linkedin.com/in/alexandru-sutii-778a3b32/
 
 paginate:         5
 
@@ -20,7 +20,7 @@ paginate:         5
 version:          2.1.0
 
 github:
-  repo:           https://github.com/poole/hyde
+  repo:           https://github.com/sutiialex/sutiialex.github.io
 
 plugins:
     - jekyll-paginate
