@@ -3,18 +3,14 @@ layout: post
 title: Sum Types and Pattern Matching in Java
 ---
 
-# Sum Types and Pattern Matching in Java
-
 So you're a Java programmer and while hanging out with your hip dev friends you've
-heard of sum types (aka union types or variants). Now you're wondering if they make
-sense for you and how would you use them in Java. Actually you probably already know
-them under a different form. In this post I'll explain what they are, how they're
-usefull, and how to use them in Java.
+heard of *sum types* (aka *union types* or *variants*). Now you're wondering if they make
+sense for you and how would you use them in Java. In this post I'll explain what they are, how they are useful, and how to use them in Java.
 
 ## Product and Sum Types
 
-Type theory says that you can model any real world data using two concepts: product
-and sum types. As an example, think of the following way of representing a person:
+Type theory says that you can model any real world data using two concepts: *product*
+and *sum types*. As an example, think of the following way of representing a person:
 
 ```java
 class Person {
@@ -23,14 +19,17 @@ class Person {
 }
 ```
 
-`Person` is a product type between the type `String` and the type `int`, meaning that
-that any string and number are possible (of course within some limits for the age).
-It's called a product type from [cartesian product](https://en.wikipedia.org/wiki/Cartesian_product), i.e., the number of values this type can take is the multiplication between the number of possible values for string and integer.
+`Person` is a *product type* between the type `String` and the type `int`, meaning that
+any combination of a string and and number are valid (of course within some limits for the age).
+The name *product type* comes from [cartesian product](https://en.wikipedia.org/wiki/Cartesian_product),
+i.e., the number of values this type can take is the product of the number
+of possible values for string and the number of possible values for
+integer.
 
-As another example, think of a binary tree that has values only in its leaves. There are
+As another example, think of a binary tree in which each leaf holds a value. There are
 two types of nodes here:
 
-* internal nodes which have two children nodes (`left` and `right`)
+* internal nodes which have two child nodes (`left` and `right`)
 * leaf nodes that have a `value`
 
 One way to represent the `Node` type is this:
@@ -54,18 +53,19 @@ Now you might be thinking: "Yep, I've been doing this for ages and everything tu
 out hunky-dory". But your new colleague Jimmy or your future self might be of a
 different opinion:
 
-* By looking at this type he doesn't know which data he should expect. He thinks all
-  the combinations are valid. He has to read your other code to understand
+* By looking at this type they don't know which data they should expect. They think
+  all the combinations are valid. They have to read your other code to understand
   your intentions.
-* Even if he gets the drill, he's still a human and makes mistakes by the
+* Even if they get the drill, they are still humans and make mistakes by the
   accessing the
-  `value` data even if he's checked this to be an internal node. The compiler smiles
-  hapilly though instead of helping him.
+  `value` data even if they've checked this to be an internal node. The compiler smiles
+  happily though instead of helping.
 
-Can we do better than this? You guessed it: `Node` is a sum type between the type
-`InternalNode` and the
+Can we do better than this? Yes, and you've probably guessed it: `Node` is a *sum
+type* between the type `InternalNode` and the
 type `LeafNode`. That is, it can be either one or the other, and depending on what it
-is, you can expect different data.
+is, you can expect different data. `InternalNode` and `LeafNode` are also called *the
+variants* of the sum type `Node`.
 
 Many languages have sum types as first class citizens. However, in Java you
 can still achieve the same by using inheritance. So for our example:
@@ -85,8 +85,8 @@ interface Node<T> {
 
 This representation has several advantages:
 
-* by just looking at the type you can see what data pertains to each variant
-* you are forced to narrow down the type `Node` to one of its *variants*,
+* by just looking at the type you can see what data is to be expected in each variant
+* you are forced to narrow down the type `Node` to one of its variants,
   `InternalNode` or `LeafNode`, before accessing the data. Otherwise, the
   compiler will bark.
 
@@ -102,9 +102,10 @@ All these need to narrow down the `Node` type. How do we do that? The recommende
 way is to use polymorphism in one
 way or another, or in other words: "thou shalt not cast". If you are writing more than
 one algorithm, you'd probably [use](https://www.baeldung.com/java-visitor-pattern)
-the [visitor pattern](https://en.wikipedia.org/wiki/Visitor_pattern)
+the [visitor pattern](https://en.wikipedia.org/wiki/Visitor_pattern). However, to me it
+seems that to use the visitor pattern you have to write quite a lot of plumbing for every little *sum type* you define.
 
-I risk getting burned at the stake by the OOP zealots, but I think using `instanceof`
+I risk getting burned at the stake for this, but I think using `instanceof`
 and casting is not such a bad alternative. Actually many modern languages
 provide a concept equivalent to this. This concept is called pattern matching (well,
 pattern matching is a bit broader concept, but that's for another post).
@@ -124,8 +125,9 @@ static <V> int treeDepth(final Node<V> node) {
 }
 ```
 
-I might be spared for doing this, because Java is also introducing [pattern matching for
-instanceof](http://openjdk.java.net/jeps/305). I.e., if you use `instanceof` in a
+I might be spared for doing this, because Java is also planned to introduce
+[pattern matching for instanceof](http://openjdk.java.net/jeps/305) in the near future. I.e.,
+if you use `instanceof` in a
 conditional, the sum type gets automatically casted to that variant, so no manual casting
 needed anymore.
 
@@ -150,9 +152,12 @@ import static patternmatch.patternmatch.PatternMatch.match;
 class Depth {
     private static <V> int treeDepth(final Node<V> node) {
         return match(node,
-                exprCase(InternalNode.class, (InternalNode n) -> 1 + max(treeDepth(n.left), treeDepth(n.right))),
-                exprCase(LeafNode.class, (LeafNode n) -> 1),
-                exprDefault(() -> { throw new RuntimeException("node not known: " + node); }));
+            exprCase(InternalNode.class, (InternalNode n) ->
+                    1 + max(treeDepth(n.left), treeDepth(n.right))),
+            exprCase(LeafNode.class, (LeafNode n) -> 1),
+            exprDefault(() -> {
+                throw new RuntimeException("node not known: " + node);
+            }));
     }
 }
 ```
@@ -169,7 +174,7 @@ on [github](https://github.com/sutiialex/java_pattern_matching/blob/master/src/p
 provides overloaded versions of `match` for 1, 2, ..., 7 variants. It's trivial
 to add more if you need to.
 
-Here's a glimpse of how it looks like:
+Here's a glimpse into what it looks like:
 
 ```java
 import java.util.Optional;
@@ -178,18 +183,24 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class PatternMatch {
-    public static <T, V1 extends T, R> R match(final T t, final Case<V1, R> c1, final Default<R> defaultF) {
+    public static <T, V1 extends T, R> R match(final T t,
+        final Case<V1, R> c1, final Default<R> defaultF) {
         return oMatch(t, c1).orElseGet(defaultF.f);
     }
 
-    public static <T, V1 extends T, V2 extends T, R> R match(final T t, final Case<V1, R> c1, final Case<V2, R> c2, final Default<R> defaultF) {
+    public static <T, V1 extends T, V2 extends T, R> R match(final T t,
+        final Case<V1, R> c1, final Case<V2, R> c2,
+        final Default<R> defaultF) {
         return oMatch(t, c1).orElseGet(() -> match(t, c2, defaultF));
     }
 
     ...
 
-    private static <T, V extends T, R> Optional<R> oMatch(final T t, final Case<V, R> c) {
-        return c.type.equals(t.getClass()) ? Optional.of(c.f.apply(c.type.cast(t))) : Optional.empty();
+    private static <T, V extends T, R> Optional<R> oMatch(final T t,
+        final Case<V, R> c) {
+        return c.type.equals(t.getClass())
+            ? Optional.of(c.f.apply(c.type.cast(t)))
+            : Optional.empty();
     }
 
     public static class Case<V, R> {
@@ -201,7 +212,8 @@ public class PatternMatch {
             this.f = f;
         }
 
-        public static <V, R> Case<V, R> exprCase(final Class<V> t, final Function<V, R> f) {
+        public static <V, R> Case<V, R> exprCase(final Class<V> t,
+            final Function<V, R> f) {
             return new Case<>(t, f);
         }
         ...
@@ -223,11 +235,11 @@ public class PatternMatch {
 }
 ```
 
-Basically the method `oMatch` gets the an object and a `Case` and if the object
-matches the variant from the case, it runs the lambda from the case and returns the result
+Basically the method `oMatch` gets an object and a `Case` and if the object
+matches the variant from the case, it runs the lambda from the `Case` and returns the result
 of the lambda wrapped in an `Optional`. If not, it returns an empty `Optional`.
 
-The `match(o, case1, case2, ..., casen, defaultF)`, calls `oMatch(o, case1)`.
+The `match(o, case1, case2, ..., casen, defaultF)` calls `oMatch(o, case1)`.
 If that matches, the result is returned, otherwise
 `match(o, case2, ..., casen, defaultF)` is called. When `match(o, casen, default)` is reached and `oMatch(o, casen)` doesn't match, we call `defaultF`.
 
