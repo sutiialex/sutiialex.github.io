@@ -237,8 +237,8 @@ Actually this a generic way of coding a state machine in a type safe manner. It 
 useful in any language and any piece of tech, not only in frontend with Redux.
 
 ## Using a Library ##
-I have been manually defining my actions like this for quite some time now, but unsurprisingly
-I discovered recently the [typesafe-actions](https://github.com/piotrwitek/typesafe-actions)
+I have been manually defining my actions like this for quite some time now, but unsurprisingly,
+I've recently discovered the [typesafe-actions](https://github.com/piotrwitek/typesafe-actions)
 library that eliminates some of the boilerplate. I think for small apps, doing it manually
 is perfectly fine. Otherwise, go for the library.
 

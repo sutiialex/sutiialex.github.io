@@ -14,7 +14,7 @@ author:
   name:           'Alexandru Sutii'
   url:            https://www.linkedin.com/in/alexandru-sutii-778a3b32/
 
-paginate:         5
+paginate:         1
 
 # Custom vars
 version:          2.1.0
@@ -24,4 +24,4 @@ github:
 
 plugins:
     - jekyll-paginate
-paginate: 5
+paginate: 1
