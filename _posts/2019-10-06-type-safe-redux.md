@@ -11,12 +11,12 @@ in order to get better type error detection, IDE autocompletion, safer refactori
 ## Background ##
 
 Let's start with an example. Let's say we want to implement a small donation form in which
-people can fill in their name and the amount they want to donate. When they click *Donate*, 
+people can fill in their name and the amount they want to donate. When they click *Donate*,
 they get a thank you message. See the source code on [Github](https://github.com/sutiialex/type-safe-redux).
 
 ![donation_form](../public/donation_form.gif "Donation Form")
 
-We have defined a controlled component that gets as props the currently filled in name, currency, amount, 
+We have defined a controlled component that gets as props the currently filled in name, currency, amount,
 whether the Donate button is enabled and whether the form has been submitted. Moreover, it gets three
 callback functions to be called when the name or amount is filled in, or if the *Donate* button is clicked.
 
@@ -34,19 +34,28 @@ type FormProps = {
 }
 
 export const Form: React.FC<FormProps> = ({
-    title, onSubmit, onNameChange, onAmountChange, currency, amount, submitEnabled, submitted}: FormProps) => {
+    name, title, onSubmit, onNameChange, onAmountChange, currency,
+    amount, submitEnabled, submitted}: FormProps) => {
     return submitted ? <span>Thank you!</span> : (
         <div>
             <h1>{title}</h1>
-            <div>Your name:<input onChange={e => onNameChange(e.target.value)}/></div>
-            <div>Amount to donate:<AmountComponent onChange={onAmountChange} currency={currency} amount={amount}/></div>
-            <button disabled={!submitEnabled} type="submit" onClick={onSubmit}>Donate</button>
+            <div>
+                Your name:
+                <input value={name} onChange={e => onNameChange(e.target.value)}/>
+            </div>
+            <div>
+                Amount to donate:
+                <AmountComponent onChange={onAmountChange} currency={currency} amount={amount}/>
+            </div>
+            <button disabled={!submitEnabled} type="submit" onClick={onSubmit}>
+                Donate
+            </button>
         </div>
     );
 };
 ```
 
-We shall use Redux to manage the state of this app. Let's define the state, the actions and the reducers.
+We shall use Redux to manage the state of this app. Let's define the state, the actions, and the reducers.
 It's already clear that we need an action for each callback: `onSubmit`, `onNameChange`,
 and `onAmountChange`. This is where I think we can make better use of Typescript.
 
@@ -68,42 +77,49 @@ const AMOUNT_CHANGE_ACTION = "amount_change";
 
 // !!! This one here is not type safe !!!
 export type FormAction = {
-    type: string; 
+    type: string;
     payload: any
 };
 
 const onSubmitActionCreator = () => ({type: SUBMIT_ACTION});
-const onNameChangeActionCreator = name => ({type: NAME_CHANGE_ACTION, payload: {name}});
+const onNameChangeActionCreator = name => (
+    {type: NAME_CHANGE_ACTION, payload: {name}}
+);
 const onAmountChangeActionCreator = (currency, amount) => (
     { type: AMOUNT_CHANGE_ACTION, payload: {amount, currency}}
 );
 
-export const formReducer: Reducer<FormState, FormAction> = (state = {submitted: false}, action): FormState => {
+export const formReducer: Reducer<FormState, FormAction> =
+    (state = {submitted: false}, action): FormState => {
     switch (action.type) {
         case NAME_CHANGE_ACTION:
             return {...state, name: action.payload.name};
         case AMOUNT_CHANGE_ACTION:
-            return {...state, amount: action.payload.amount, currency: action.payload.currency};
+            return {
+                ...state,
+                amount: action.payload.amount,
+                currency: action.payload.currency
+            };
         case SUBMIT_ACTION:
             return {...state, submitted: true};
     }
 };
 ```
 
-Particularly, see the `FormAction` type. This is reminiscent of how people do this in Javascript. 
+Particularly, see the `FormAction` type. This is reminiscent of how people do this in Javascript.
 That is, you define a constant for each action type. In the reducer you check the type
-and depending on that you expect a certain type of payload. 
+and depending on that you expect a certain type of payload.
 
 What's the problem with this approach? If you mistype a payload field name in the reducer, the type
 checker cannot detect that. Your IDE doesn't provide any autocompletion for the payload field in the reducer
-because it's type is `any`. If you refactor your action type, the compiler doesn't guide
+because its type is `any`. If you refactor your action type, the compiler doesn't guide
 you to also change the reducer and the action creators, thus leaving you with a runtime error.
-Equaly important, the action type is not expressive. You are forced to read the action creators 
+Equally important, the action type is not expressive. You are forced to read the action creators
 (if you are lucky enough to have ones) or the reducers to understand what data should be in each action.
 
 ## The Type Safe Approach ##
 
-The first step to making this better is to realize that action is a union type. See 
+The first step to making this better is to realize that `FormAction` is a union type. See
 [my previous post](./2019-09-08-java-pattern-matching.md) about union types. That is,
 action is a union of three variants: submit action, change name action and change amount action.
 Depending on the variant, there are different types of data in them. We need to tell that to the compiler.
@@ -113,11 +129,16 @@ The action type will look like this:
 ```typescript
 type SubmitAction = { type: 'submit' }
 type NameChangeAction = { type: 'name_change', name: string }
-type AmountChangeAction = { type: 'amount_change', amount?: number, currency?: string }
+type AmountChangeAction = {
+    type: 'amount_change',
+    amount?: number,
+    currency?: string
+}
 
-export type FormAction = SubmitAction | NameChangeAction | AmountChangeAction
+export type FormAction =
+    SubmitAction | NameChangeAction | AmountChangeAction
 ```
-As you can see, we've specified each variant and its data: `SubmitAction`, `NameChangeAction`, 
+As you can see, we've specified each variant and its data: `SubmitAction`, `NameChangeAction`,
 `AmountChangeAction`. We've also specified that `FormAction` is a union of those three variants.
 The field `type` is called a discriminator. If we'll check its value in a conditional,
 the compiler will automatically narrow `FormAction` to the corresponding variant in the body of
@@ -125,12 +146,17 @@ that conditional.
 
 This is how our reducer will look like:
 ```typescript
-export const reducer: Reducer<FormState, FormAction> = (state = {submitted: false}, action): FormState => {
+export const reducer: Reducer<FormState, FormAction> =
+    (state = {submitted: false}, action): FormState => {
     switch (action.type) {
         case "name_change":
             return {...state, name: action.name};
         case "amount_change":
-            return {...state, amount: action.amount, currency: action.currency};
+            return {
+                ...state,
+                amount: action.amount,
+                currency: action.currency
+            };
         case "submit":
             return {...state, submitted: true};
     }
@@ -164,14 +190,15 @@ export type FormState = FormInProgress | FormSubmitted;
 This might seem overkill, but as your application grows this can become very powerful.
 Imagine that on the *Form Submitted* page we have a *Share* button. That would generate a
 new action `ShareAction`. This action is only allowed in the form submitted state. We don't show the button
-anymore after the user has clicked it once. We can easily codify that now in the reducer by first matching 
+anymore after the user has clicked it once. We can easily codify that now in the reducer by first matching
 the state and then the action.
 ```typescript
 ...
 
 type ShareAction = { type: 'share' } // <-- !!!
 
-export type FormAction = SubmitAction | NameChangeAction | AmountChangeAction | ShareAction;
+export type FormAction =
+    SubmitAction | NameChangeAction | AmountChangeAction | ShareAction;
 
 ...
 
@@ -182,14 +209,15 @@ type FormSubmitted = { // <-- !!!
 
 export type FormState = FormInProgress | FormSubmitted;
 
-export const reducer: Reducer<FormState, FormAction> = (state = {type: 'form_in_progress'}, action): FormState => {
+export const reducer: Reducer<FormState, FormAction> =
+    (state = {type: 'form_in_progress'}, action): FormState => {
     switch (state.type) {
         case "form_in_progress": {
             switch (action.type) {
                 case "name_change": ...
                 case "amount_change": ...
-                case "submit":
-                    return {type: "form_submitted", shared: false}; // <-- !!!
+                case "submit": // <-- !!!
+                    return {type: "form_submitted", shared: false};
                 default:
                     return state;
             }
@@ -210,7 +238,7 @@ useful in any language and any piece of tech, not only in frontend with Redux.
 
 ## Using a Library ##
 I have been manually defining my actions like this for quite some time now, but unsurprisingly
-I discovered recently the [typesafe-actions](https://github.com/piotrwitek/typesafe-actions) 
+I discovered recently the [typesafe-actions](https://github.com/piotrwitek/typesafe-actions)
 library that eliminates some of the boilerplate. I think for small apps, doing it manually
 is perfectly fine. Otherwise, go for the library.
 
