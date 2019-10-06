@@ -120,7 +120,7 @@ Equally important, the action type is not expressive. You are forced to read the
 ## The Type Safe Approach ##
 
 The first step to making this better is to realize that `FormAction` is a union type. See
-[my previous post](./2019-09-08-java-pattern-matching.md) about union types. That is,
+[my previous post](./2019/09/08/java-pattern-matching/) about union types. That is,
 action is a union of three variants: submit action, change name action and change amount action.
 Depending on the variant, there are different types of data in them. We need to tell that to the compiler.
 Typescript calls these [Discriminated Unions](http://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions).
