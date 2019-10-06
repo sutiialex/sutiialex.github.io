@@ -14,14 +14,12 @@ author:
   name:           'Alexandru Sutii'
   url:            https://www.linkedin.com/in/alexandru-sutii-778a3b32/
 
-paginate:         1
-
 # Custom vars
 version:          2.1.0
 
 github:
   repo:           https://github.com/sutiialex/sutiialex.github.io
 
-plugins:
-    - jekyll-paginate
-paginate: 1
+gems: [jekyll-paginate]
+
+paginate: 10
