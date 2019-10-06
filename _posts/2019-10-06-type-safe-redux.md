@@ -14,7 +14,7 @@ Let's start with an example. Let's say we want to implement a small donation for
 people can fill in their name and the amount they want to donate. When they click *Donate*,
 they get a thank you message. See the source code on [Github](https://github.com/sutiialex/type-safe-redux).
 
-![donation_form](../public/donation_form.gif "Donation Form")
+![donation_form](/public/donation_form.gif "Donation Form")
 
 We have defined a controlled component that gets as props the currently filled in name, currency, amount,
 whether the Donate button is enabled and whether the form has been submitted. Moreover, it gets three
@@ -165,7 +165,7 @@ export const reducer: Reducer<FormState, FormAction> =
 Now our reducer is type safe. Auto-completion works, type errors are caught, and refactoring is safe.
 Moreover, the definition of `FormAction` is very expressive. You don't need to read the
 action creators and the reducer code to understand what payload is in each action.
-![type_safe_reducer](../public/type_safe_reducer.gif)
+![type_safe_reducer](/public/type_safe_reducer.gif)
 
 ## Using Union Types for State ##
 Type safe actions is just one of the many uses for union types. You can think of them as an extension
